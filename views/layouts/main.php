@@ -8,6 +8,7 @@ use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
+use yii\bootstrap\Dropdown;
 
 AppAsset::register($this);
 ?>
@@ -26,6 +27,7 @@ AppAsset::register($this);
 
 <div class="wrap">
     <?php
+
     NavBar::begin([
         'brandLabel' => 'My Company',
         'brandUrl' => Yii::$app->homeUrl,
@@ -33,12 +35,35 @@ AppAsset::register($this);
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
+
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav navbar-right'],
         'items' => [
             ['label' => 'Home', 'url' => ['/site/index']],
             ['label' => 'About', 'url' => ['/site/about']],
             ['label' => 'Contact', 'url' => ['/site/contact']],
+            ['label' => 'Countries', 'url' => ['/country/index']],
+            ['label' => 'Form', 'url' => ['/site/entry']],
+            [
+                'label' => 'App',
+                'items' => [
+                    ['label' => 'App', 'url' => ['/app/index']],
+                    ['label' => 'App version', 'url' => ['/app-version/index']],
+                    ['label' => 'App output structure', 'url' => ['/app-output-structure/index']],
+                    ['label' => 'App output key', 'url' => ['/app-output-key/index']],
+                    ['label' => 'App settings', 'url' => ['/app-settings/index']],
+                    ['label' => 'Data grid jQuery', 'url' => ['/app/data-grid-jquery']]
+                ]
+            ],
+            [
+                'label' => 'Cpu',
+                'items' => [
+                    ['label' => 'Cpu', 'url' => ['cpu/index']],
+                    ['label' => 'Cpu Attribute Group', 'url' => ['cpu-attribute-group/index']],
+                    ['label' => 'Cpu Attribute', 'url' => ['cpu-attribute/index']],
+                    ['label' => 'Cpu Attribute Value', 'url' => ['cpu-attribute-value/index']]
+                ]
+            ],
             Yii::$app->user->isGuest ? (
                 ['label' => 'Login', 'url' => ['/site/login']]
             ) : (
