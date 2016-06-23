@@ -4,6 +4,7 @@ use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Cpu */
+/* @var $cpuAttributeCollection app\models\CpuAttribute[] */
 
 $this->title = Yii::t('app', 'Update {modelClass}: ', [
     'modelClass' => 'Cpu',
@@ -18,6 +19,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Update');
 
     <?= $this->render('_form', [
         'model' => $model,
+        'cpuAttributeCollection' => $cpuAttributeCollection
     ]) ?>
 
 </div>

@@ -5,6 +5,7 @@ use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Cpu */
+/* @var $attributeGroupCollection app\models\CpuAttributeGroup[] */
 
 $this->title = Yii::t('app', 'Create Cpu');
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Cpus'), 'url' => ['index']];
@@ -16,6 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= $this->render('_form', [
         'model' => $model,
+        'attributeGroupCollection' => $attributeGroupCollection
     ]) ?>
 
 </div>

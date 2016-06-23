@@ -23,7 +23,7 @@
             <td><?php
 
                 foreach ($app->versionCollection as $k => $version) {
-                    echo '<a href="/app-version/view?id=' . $version->app_version_id . '">' . $version->version . '</a>';
+                    echo '<a href="' . Yii::$app->urlManager->createUrl(['app-version/view', 'id' => $version->app_version_id]) . '">' . $version->version . '</a>';
                     if ($k + 1 < count($app->versionCollection)) {
                         echo ', ';
                     }
@@ -31,9 +31,9 @@
 
             ?></td>
             <td><?php
-                echo '<a href="/app/view?id=' . $app->app_id . '">View</a>, ';
-                echo '<a href="/app/update?id=' . $app->app_id . '">Update</a>, ';
-                echo '<a href="/app/delete?id=' . $app->app_id . '">Delete</a>';
+                echo '<a href="' . Yii::$app->urlManager->createUrl(['app/view', 'id' => $app->app_id]) . '">View</a>, ';
+                echo '<a href="' . Yii::$app->urlManager->createUrl(['app/update', 'id' => $app->app_id]) . '">Update</a>, ';
+                echo '<a href="' . Yii::$app->urlManager->createUrl(['app/delete', 'id' => $app->app_id]) . '">Delete</a>';
             ?></td>
         </tr>
         <?php endforeach; ?>
