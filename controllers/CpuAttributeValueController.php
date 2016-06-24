@@ -8,6 +8,8 @@ use app\models\CpuAttributeValueSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
+use yii\widgets\ActiveForm;
 
 /**
  * CpuAttributeValueController implements the CRUD actions for CpuAttributeValue model.
@@ -83,6 +85,11 @@ class CpuAttributeValueController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+
+        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->cpu_attribute_value_id]);

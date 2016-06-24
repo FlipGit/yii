@@ -113,47 +113,61 @@ class CpuController extends Controller
     {
         $model = $this->findModel($id);
 
+        // populate all attributes from db and join existing value to attribute
+        // (instead of tons queries for each attribute)
         /* @var $cpuAttributeCollection \app\models\CpuAttribute[] */
-        $cpuAttributeCollection = CpuAttribute::find()->joinWith([
+/*        $cpuAttributeCollection = CpuAttribute::find()->joinWith([
             'cpuAttributeValues' => function (\yii\db\ActiveQuery $query) use ($model) {
                 return $query->andOnCondition('cpu_id=:cpu_id', [':cpu_id' => $model->cpu_id]);
             }
-        ])->all();
+        ])->all();*/
+
+/*        $formName = (new CpuAttributeValue())->formName();*/
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
-            $itemsToSave = [];
+/*            $itemsToSave = [];
 
-            foreach (Yii::$app->request->post()['CpuAttributeValue'] as $i => $arr) {
+            foreach (Yii::$app->request->post()[$formName] as $i => $arr) {
 
                 $itemToSave = new CpuAttributeValue();
+                $itemToSave->insert();
+                $itemToSave->setIsNewRecord(false);
 
                 foreach ($cpuAttributeCollection as $cpuAttribute) {
-
+                    // if record from db have the same [[id]] as post record, then overwrite [[$itemToSave]]
+                    // by already founded (later, will be called update instead of insert)
                     if (isset($cpuAttribute->cpuAttributeValues[0]) && $cpuAttribute->cpuAttributeValues[0]->cpu_attribute_value_id == $arr['cpu_attribute_value_id']) {
                         $itemToSave = $cpuAttribute->cpuAttributeValues[0];
                         break;
                     }
                 }
 
-                $itemToSave->load(['CpuAttributeValue' => $arr]);
+                $itemToSave->load([$formName => $arr]);
 
                 if (!empty($itemToSave->value)) {
-                    $itemsToSave[] = $itemToSave;
+                    $itemsToSave[] = $itemToSave; // continue working only with non empty attributes
                 } else if ($itemToSave->cpu_attribute_value_id !== null) {
-                    $itemToSave->delete();
+                    $itemToSave->delete(); // delete records with empty values
                 }
-            }
+            }*/
 
-            foreach ($itemsToSave as $itemToSave) {
+/*            if (!CpuAttributeValue::validateMultiple($itemsToSave)) {
+                return $this->render('update', [
+                    'model' => $model,
+                    'cpuAttributeCollection' => $cpuAttributeCollection
+                ]);
+            }*/
+
+/*            foreach ($itemsToSave as $itemToSave) {
                 $itemToSave->save();
-            }
+            }*/
 
             return $this->redirect(['view', 'id' => $model->cpu_id]);
         } else {
             return $this->render('update', [
-                'model' => $model,
-                'cpuAttributeCollection' => $cpuAttributeCollection
+                'model' => $model
+                //'cpuAttributeCollection' => $cpuAttributeCollection
             ]);
         }
     }

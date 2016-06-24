@@ -10,7 +10,10 @@ use yii\widgets\ActiveForm;
 
 <div class="cpu-attribute-value-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ActiveForm::begin([
+        'enableAjaxValidation' => true,
+        'enableClientValidation' => false
+    ]); ?>
 
     <?= $form->field($model, 'value')->textInput(['maxlength' => true]) ?>
 

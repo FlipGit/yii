@@ -59,6 +59,32 @@ class CpuAttribute extends \yii\db\ActiveRecord
         ];
     }
 
+    public function validateValueByType($value)
+    {
+        $types = [
+            'integer' => [
+                'message' => 'Incorrect input. Integer expected.',
+                'callback' => function ($value) {
+                    return ctype_digit($value);
+                }
+            ],
+            'string' => [
+                'message' => 'Incorrect input. String expected.',
+                'callback' => function ($value) {
+                    return is_string($value);
+                }
+            ]
+        ];
+
+        if (!isset($types[$this->type])) {
+            return ['valid' => false, 'message' => 'Data type: "' . $this->type . '" not supported.'];
+        }
+
+        return $types[$this->type]['callback']($value)
+            ? ['valid' => true, 'message' => null]
+            : ['valid' => false, 'message' => $types[$this->type]['message']];
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */

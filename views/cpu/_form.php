@@ -15,7 +15,10 @@ use app\models\CpuAttributeValue;
 
 <div class="cpu-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ActiveForm::begin([
+        //'enableClientValidation' => false,
+        //'enableAjaxValidation' => true
+    ]); ?>
 
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
@@ -33,15 +36,17 @@ use app\models\CpuAttributeValue;
 
     <?php if ($model->isNewRecord == false) {
 
+        $cpuAttributeCollection = $model->getCpuAttributesWithExistingValues();
+
         foreach ($cpuAttributeCollection as $i => $cpuAttribute) {
 
             $cpuAttributeValue = isset($cpuAttribute->cpuAttributeValues[0])
                 ? $cpuAttribute->cpuAttributeValues[0]
                 : new CpuAttributeValue();
 
-            echo Html::hiddenInput('CpuAttributeValue[' . $i .'][cpu_id]', $model->cpu_id); // this shit for multiple load/validate
-            echo Html::hiddenInput('CpuAttributeValue[' . $i .'][cpu_attribute_value_id]', $cpuAttributeValue->cpu_attribute_value_id);
-            echo Html::hiddenInput('CpuAttributeValue[' . $i .'][cpu_attribute_id]', $cpuAttribute->cpu_attribute_id);
+            echo Html::hiddenInput($cpuAttributeValue->formName() . '[' . $i .'][cpu_id]', $model->cpu_id);
+            echo Html::hiddenInput($cpuAttributeValue->formName() . '[' . $i .'][cpu_attribute_value_id]', $cpuAttributeValue->cpu_attribute_value_id);
+            echo Html::hiddenInput($cpuAttributeValue->formName() . '[' . $i .'][cpu_attribute_id]', $cpuAttribute->cpu_attribute_id);
             echo $form->field($cpuAttributeValue, '[' . $i . ']value')->textInput(['maxlength' => true])->label($cpuAttribute->name);
 
         }

@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\bootstrap\Html;
 
 /**
  * This is the model class for table "cpu_attribute_value".
@@ -34,9 +35,31 @@ class CpuAttributeValue extends \yii\db\ActiveRecord
             [['cpu_id', 'cpu_attribute_id'], 'required'],
             [['cpu_id', 'cpu_attribute_id'], 'integer'],
             [['value'], 'string', 'max' => 2048],
+            [['value'], 'validateValue'],
+            /*['token', function ($attribute, $params) {
+                if (!ctype_alnum($this->$attribute)) {
+                    $this->addError($attribute, 'The token must contain letters or digits.');
+                }
+            }],*/
             [['cpu_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cpu::className(), 'targetAttribute' => ['cpu_id' => 'cpu_id']],
             [['cpu_attribute_id'], 'exist', 'skipOnError' => true, 'targetClass' => CpuAttribute::className(), 'targetAttribute' => ['cpu_attribute_id' => 'cpu_attribute_id']],
         ];
+    }
+
+    public function validateValue($attribute, $params)
+    {
+        $cpuAttribute = CpuAttribute::findOne($this->cpu_attribute_id);
+
+        if ($cpuAttribute === null) {
+            //$this->addError($this->cpu_attribute_id, 'Unknown attribute.');
+            return;
+        }
+
+        $validation = $cpuAttribute->validateValueByType($this->value);
+
+        if ($validation['valid'] == false) {
+            $this->addError($attribute, $validation['message']);
+        }
     }
 
     /**
