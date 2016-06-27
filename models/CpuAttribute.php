@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use Yii;
+use yii;
 
 /**
  * This is the model class for table "cpu_attribute".
@@ -18,7 +18,7 @@ use Yii;
  * @property CpuAttributeGroup $cpuAttributeGroup
  * @property CpuAttributeValue[] $cpuAttributeValues
  */
-class CpuAttribute extends \yii\db\ActiveRecord
+class CpuAttribute extends yii\db\ActiveRecord
 {
     /**
      * @inheritdoc
@@ -74,6 +74,7 @@ class CpuAttribute extends \yii\db\ActiveRecord
                     return is_string($value);
                 }
             ]
+            // ... validation rules for other types
         ];
 
         if (!isset($types[$this->type])) {

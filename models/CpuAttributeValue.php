@@ -2,8 +2,7 @@
 
 namespace app\models;
 
-use Yii;
-use yii\bootstrap\Html;
+use yii;
 
 /**
  * This is the model class for table "cpu_attribute_value".
@@ -16,7 +15,7 @@ use yii\bootstrap\Html;
  * @property Cpu $cpu
  * @property CpuAttribute $cpuAttribute
  */
-class CpuAttributeValue extends \yii\db\ActiveRecord
+class CpuAttributeValue extends yii\db\ActiveRecord
 {
     /**
      * @inheritdoc
@@ -36,14 +35,18 @@ class CpuAttributeValue extends \yii\db\ActiveRecord
             [['cpu_id', 'cpu_attribute_id'], 'integer'],
             [['value'], 'string', 'max' => 2048],
             [['value'], 'validateValue'],
-            /*['token', function ($attribute, $params) {
-                if (!ctype_alnum($this->$attribute)) {
-                    $this->addError($attribute, 'The token must contain letters or digits.');
-                }
-            }],*/
             [['cpu_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cpu::className(), 'targetAttribute' => ['cpu_id' => 'cpu_id']],
             [['cpu_attribute_id'], 'exist', 'skipOnError' => true, 'targetClass' => CpuAttribute::className(), 'targetAttribute' => ['cpu_attribute_id' => 'cpu_attribute_id']],
         ];
+    }
+
+    const SCENARIO_CPU_NOT_CREATED = 'cpu-not-created';
+
+    public function scenarios()
+    {
+        $scenarios  = parent::scenarios();
+        $scenarios[self::SCENARIO_CPU_NOT_CREATED] = ['value', 'cpu_attribute_id'];
+        return $scenarios;
     }
 
     public function validateValue($attribute, $params)
@@ -51,7 +54,7 @@ class CpuAttributeValue extends \yii\db\ActiveRecord
         $cpuAttribute = CpuAttribute::findOne($this->cpu_attribute_id);
 
         if ($cpuAttribute === null) {
-            //$this->addError($this->cpu_attribute_id, 'Unknown attribute.');
+            $this->addError($attribute, 'Attribute not found.');
             return;
         }
 

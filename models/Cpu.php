@@ -2,7 +2,7 @@
 
 namespace app\models;
 
-use Yii;
+use yii;
 
 /**
  * This is the model class for table "cpu".
@@ -22,9 +22,8 @@ use Yii;
 class Cpu extends \yii\db\ActiveRecord
 {
     /* @var $attributes \app\models\CpuAttribute[] */
-    //protected $cpuAttributes = -1; // if -1, need to call [[getCpuAttributesWithExistingValues()]]
-    /* @var $attributes \app\models\CpuAttributeValue[] */
-    protected $itemsToSave = [];
+    /* @var $attributeValuesForForm \app\models\CpuAttributeValue[] */
+    protected $attributeValuesForForm = -1; // -1 for GET update, see [[getAttributeValuesForForm]]
 
     /**
      * @inheritdoc
@@ -44,7 +43,7 @@ class Cpu extends \yii\db\ActiveRecord
             [['attribute_json'], 'string'],
             [['performance_rank'], 'integer'],
             [['performance_per_vat', 'performance_per_dollar'], 'number'],
-            [['name'], 'string', 'max' => 128],
+            [['name'], 'string', 'max' => 128]
         ];
     }
 
@@ -65,54 +64,105 @@ class Cpu extends \yii\db\ActiveRecord
         ];
     }
 
-    /* @return \app\models\CpuAttribute[] */
-/*    public function getCpuAttributes()
+    // this one for create/update use only
+    /* @return \app\models\CpuAttributeValue[] */
+    public function getAttributeValuesForForm()
     {
-        if ($this->cpuAttributes === -1) {
-            $this->cpuAttributes = $this->getCpuAttributesWithExistingValues();
+        // -1 mean GET update (need to load all attributes and their values from db)
+        // otherwise, return already extracted data
+        if ($this->attributeValuesForForm !== -1) {
+            return $this->attributeValuesForForm;
         }
 
-        return $this->cpuAttributes;
-    }*/
+        $result = [];
+        $items = $this->getCpuAttributesWithExistingValues();
 
-    // @TODO rename
-    /* @return \app\models\CpuAttributeValue[] */
-    public function getItemsToSave()
-    {
-        return $this->itemsToSave;
+        foreach ($items as $item) {
+            $push = new CpuAttributeValue();
+            $push->cpu_id = $this->cpu_id;
+            $push->cpu_attribute_id = $item->cpu_attribute_id;
+
+            if (isset($item->cpuAttributeValues[0])) {
+                $push = $item->cpuAttributeValues[0];
+            }
+
+            $result[] = $push;
+        }
+
+        return $this->attributeValuesForForm = $result;
     }
 
-    // in [[$data]] should be data for BOTH models
+    // in [[$data]] should be data for BOTH models (Cpu and their attributes)
     public function load($data, $formName = null)
     {
         $result = parent::load($data, $formName);
         $formNameForAttributes = (new CpuAttributeValue())->formName();
 
+        // for example, if attributes is not exist
+        // POST does not contain [[formNameForAttributes]]
         if (!isset($data[$formNameForAttributes])) {
-            return false;
+            return $result;
         }
 
-        $this->itemsToSave = [];
+        $this->attributeValuesForForm = [];
         $cpuAttributeCollection = $this->getCpuAttributesWithExistingValues();
 
         foreach ($data[$formNameForAttributes] as $i => $arr) {
 
             $itemToSave = new CpuAttributeValue();
 
-            foreach ($cpuAttributeCollection as $cpuAttribute) {
-                // if record from db have the same [[id]] as post record, then overwrite [[$itemToSave]]
-                // by already founded (later, will be called update instead of insert)
-                if (isset($cpuAttribute->cpuAttributeValues[0]) && $cpuAttribute->cpuAttributeValues[0]->cpu_attribute_value_id == $arr['cpu_attribute_value_id']) {
-                    $itemToSave = $cpuAttribute->cpuAttributeValues[0];
-                    break;
-                }
+            if ($this->isNewRecord) {
+                $itemToSave->scenario = CpuAttributeValue::SCENARIO_CPU_NOT_CREATED;
             }
 
             if (!$itemToSave->load([$formNameForAttributes => $arr])) {
                 $result = false;
             }
 
-            $this->itemsToSave[] = $itemToSave;
+            // if record from db have the same [[id]] as POST record, then overwrite [[$itemToSave]]
+            // by already founded obj (later, will be called update instead of insert)
+            foreach ($cpuAttributeCollection as $cpuAttribute) {
+
+                if (isset($cpuAttribute->cpuAttributeValues[0]) && $cpuAttribute->cpuAttributeValues[0]->cpu_attribute_value_id == $arr['cpu_attribute_value_id']) {
+                    $itemToSave = $cpuAttribute->cpuAttributeValues[0];
+                    if (!$itemToSave->load([$formNameForAttributes => $arr])) {
+                        $result = false;
+                    }
+                    break;
+                }
+            }
+
+            $this->attributeValuesForForm[] = $itemToSave;
+        }
+
+        return $result;
+    }
+
+    public function validate($attributeNames = null, $clearErrors = true)
+    {
+        $result =  parent::validate($attributeNames, $clearErrors);
+
+        if (!is_array($this->attributeValuesForForm)) {
+            return $result;
+        }
+
+        return self::validateMultiple($this->attributeValuesForForm) && $result;
+    }
+
+    public function validaAjax()
+    {
+        $result = [];
+
+        if (!is_array($this->attributeValuesForForm)) {
+            return $result;
+        }
+
+        foreach ($this->attributeValuesForForm as $i => $attributeValue) {
+            $attributeValue->validate();
+            foreach ($attributeValue->getErrors() as $attribute => $errors) {
+                $inputId = mb_strtolower($attributeValue->formName() . '-' . $i . '-' . "$attribute", 'utf-8');
+                $result[$inputId] = $errors;
+            }
         }
 
         return $result;
@@ -121,33 +171,44 @@ class Cpu extends \yii\db\ActiveRecord
     public function save($runValidation = true, $attributeNames = null)
     {
         // begin transaction (it should also work for [[actionCreate]])
+        $transaction = Yii::$app->db->beginTransaction();
 
-        $result = parent::save($runValidation, $attributeNames);
+        try {
 
-        // if result == false => roll back => return false
+            $result = parent::save($runValidation, $attributeNames);
 
-        // for [[actionCreate]] implementation, don't forget
-        // to set [[cpu_id]] attribute for [[$attributes]] here
-
-        foreach ($this->itemsToSave as $attribute) {
-            if (!empty($attribute->value)) {
-                $result = $attribute->save() ? $result : false;
-            } else if ($attribute->cpu_attribute_value_id !== null) {
-                $attribute->delete();
+            // if result == false => roll back => return false
+            if ($result == false) {
+                $transaction->rollBack();
+                return $result;
             }
+
+            foreach ($this->attributeValuesForForm as $attributeValue) {
+                if (!empty($attributeValue->value)) {
+                    // [[cpu_id]] property not set at [[actionCreate]]
+                    $attributeValue->cpu_id = $this->cpu_id;
+                    // set scenario to default, cause [[cpu_id]] property already set
+                    // that important for [[actionCreate]] only, in other cases
+                    // scenario continue to be default - behavior not changed
+                    $attributeValue->scenario = CpuAttributeValue::SCENARIO_DEFAULT;
+                    $result = $attributeValue->save() ? $result : false;
+                } else if ($attributeValue->cpu_attribute_value_id !== null) {
+                    $attributeValue->delete();
+                }
+            }
+
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            return false;
         }
 
-        // if result == false => roll back
+        if ($result == false) {
+            $transaction->rollBack();
+            return $result;
+        }
 
+        $transaction->commit();
         return $result;
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getCpuAttributeValues()
-    {
-        return $this->hasMany(CpuAttributeValue::className(), ['cpu_id' => 'cpu_id']);
     }
 
     /* @return \app\models\CpuAttribute[] */
@@ -158,13 +219,19 @@ class Cpu extends \yii\db\ActiveRecord
         // populate all attributes from db and join existing value to attribute
         // (instead of tons queries for each attribute)
         /* @var $cpuAttributeCollection \app\models\CpuAttribute[] */
-        $x = CpuAttribute::find()->joinWith([
-            'cpuAttributeValues' => function (\yii\db\ActiveQuery $query) use ($cpu_id) {
+        return CpuAttribute::find()->joinWith([
+            'cpuAttributeValues' => function (yii\db\ActiveQuery $query) use ($cpu_id) {
                 return $query->andOnCondition('cpu_id=:cpu_id', [':cpu_id' => $cpu_id]);
             }
-        ])->all();
+        ])->orderBy('name ASC')->all();
+    }
 
-        return $x;
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCpuAttributeValues()
+    {
+        return $this->hasMany(CpuAttributeValue::className(), ['cpu_id' => 'cpu_id']);
     }
 
     /**

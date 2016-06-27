@@ -1,9 +1,7 @@
 <?php
 
-use app\models\CpuAttribute;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use app\models\CpuAttributeValue;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Cpu */
@@ -16,8 +14,8 @@ use app\models\CpuAttributeValue;
 <div class="cpu-form">
 
     <?php $form = ActiveForm::begin([
-        //'enableClientValidation' => false,
-        //'enableAjaxValidation' => true
+        'enableClientValidation' => false,
+        'enableAjaxValidation' => true
     ]); ?>
 
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
@@ -34,24 +32,21 @@ use app\models\CpuAttributeValue;
 
     <?= $form->field($model, 'performance_per_dollar')->textInput() ?>
 
-    <?php if ($model->isNewRecord == false) {
+    <?php
 
-        $cpuAttributeCollection = $model->getCpuAttributesWithExistingValues();
+        $cpuAttributeValuesCollection = $model->getAttributeValuesForForm();
 
-        foreach ($cpuAttributeCollection as $i => $cpuAttribute) {
-
-            $cpuAttributeValue = isset($cpuAttribute->cpuAttributeValues[0])
-                ? $cpuAttribute->cpuAttributeValues[0]
-                : new CpuAttributeValue();
-
+        foreach ($cpuAttributeValuesCollection as $i => $cpuAttributeValue) {
             echo Html::hiddenInput($cpuAttributeValue->formName() . '[' . $i .'][cpu_id]', $model->cpu_id);
             echo Html::hiddenInput($cpuAttributeValue->formName() . '[' . $i .'][cpu_attribute_value_id]', $cpuAttributeValue->cpu_attribute_value_id);
-            echo Html::hiddenInput($cpuAttributeValue->formName() . '[' . $i .'][cpu_attribute_id]', $cpuAttribute->cpu_attribute_id);
-            echo $form->field($cpuAttributeValue, '[' . $i . ']value')->textInput(['maxlength' => true])->label($cpuAttribute->name);
-
+            echo Html::hiddenInput($cpuAttributeValue->formName() . '[' . $i .'][cpu_attribute_id]', $cpuAttributeValue->cpu_attribute_id);
+            echo $form
+                ->field($cpuAttributeValue, '[' . $i . ']value')
+                ->textInput(['maxlength' => true])
+                ->label($cpuAttributeValue->cpuAttribute->name); // @TODO fix performance && fix bug
         }
 
-    } ?>
+     ?>
 
     <div class="form-group">
         <?= Html::submitButton($model->isNewRecord ? Yii::t('app', 'Create') : Yii::t('app', 'Update'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
