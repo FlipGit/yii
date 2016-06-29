@@ -52,7 +52,8 @@ AppAsset::register($this);
                     ['label' => 'App output structure', 'url' => ['/app-output-structure/index']],
                     ['label' => 'App output key', 'url' => ['/app-output-key/index']],
                     ['label' => 'App settings', 'url' => ['/app-settings/index']],
-                    ['label' => 'Data grid jQuery', 'url' => ['/app/data-grid-jquery']]
+                    ['label' => 'Data grid jQuery', 'url' => ['/app/data-grid-jquery']],
+                    ['label' => 'Data grid Angular', 'url' => ['/app/data-grid-angular']]
                 ]
             ],
             [

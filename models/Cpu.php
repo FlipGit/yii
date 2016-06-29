@@ -3,6 +3,9 @@
 namespace app\models;
 
 use yii;
+use yii\helpers\Html;
+use DateTime;
+use DateTimeZone;
 
 /**
  * This is the model class for table "cpu".
@@ -13,7 +16,7 @@ use yii;
  * @property string $updated_date
  * @property string $attribute_json
  * @property integer $performance_rank
- * @property double $performance_per_vat
+ * @property double $performance_per_watt
  * @property double $performance_per_dollar
  *
  * @property CpuAttributeValue[] $cpuAttributeValues
@@ -39,10 +42,11 @@ class Cpu extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['name'], 'required'],
             [['created_date', 'updated_date'], 'safe'],
             [['attribute_json'], 'string'],
             [['performance_rank'], 'integer'],
-            [['performance_per_vat', 'performance_per_dollar'], 'number'],
+            [['performance_per_watt', 'performance_per_dollar'], 'number'],
             [['name'], 'string', 'max' => 128]
         ];
     }
@@ -75,15 +79,15 @@ class Cpu extends \yii\db\ActiveRecord
         }
 
         $result = [];
-        $items = $this->getCpuAttributesWithExistingValues();
+        $cpuAttributeCollection = $this->getCpuAttributesWithExistingValues();
 
-        foreach ($items as $item) {
+        foreach ($cpuAttributeCollection as $cpuAttribute) {
             $push = new CpuAttributeValue();
             $push->cpu_id = $this->cpu_id;
-            $push->cpu_attribute_id = $item->cpu_attribute_id;
+            $push->cpu_attribute_id = $cpuAttribute->cpu_attribute_id;
 
-            if (isset($item->cpuAttributeValues[0])) {
-                $push = $item->cpuAttributeValues[0];
+            if (isset($cpuAttribute->cpuAttributeValues[0])) {
+                $push = $cpuAttribute->cpuAttributeValues[0];
             }
 
             $result[] = $push;
@@ -149,16 +153,20 @@ class Cpu extends \yii\db\ActiveRecord
         return self::validateMultiple($this->attributeValuesForForm) && $result;
     }
 
-    public function validaAjax()
+    public function validateAjax()
     {
         $result = [];
+        $this->validate();
+
+        foreach ($this->getErrors() as $attribute => $errors) {
+            $result[Html::getInputId($this, $attribute)] = $errors;
+        }
 
         if (!is_array($this->attributeValuesForForm)) {
             return $result;
         }
 
         foreach ($this->attributeValuesForForm as $i => $attributeValue) {
-            $attributeValue->validate();
             foreach ($attributeValue->getErrors() as $attribute => $errors) {
                 $inputId = mb_strtolower($attributeValue->formName() . '-' . $i . '-' . "$attribute", 'utf-8');
                 $result[$inputId] = $errors;
@@ -170,14 +178,12 @@ class Cpu extends \yii\db\ActiveRecord
 
     public function save($runValidation = true, $attributeNames = null)
     {
-        // begin transaction (it should also work for [[actionCreate]])
         $transaction = Yii::$app->db->beginTransaction();
 
         try {
 
             $result = parent::save($runValidation, $attributeNames);
 
-            // if result == false => roll back => return false
             if ($result == false) {
                 $transaction->rollBack();
                 return $result;
@@ -208,6 +214,21 @@ class Cpu extends \yii\db\ActiveRecord
         }
 
         $transaction->commit();
+        return $result;
+    }
+
+    public function beforeSave($insert)
+    {
+        $result = parent::beforeSave($insert);
+
+        $dateTime = new DateTime('now', new DateTimeZone('UTC'));
+
+        if ($this->isNewRecord) {
+            $this->created_date = $dateTime->format('Y-m-d H:i:s');
+        } else {
+            $this->updated_date = $dateTime->format('Y-m-d H:i:s');
+        }
+
         return $result;
     }
 

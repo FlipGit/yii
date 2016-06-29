@@ -47,6 +47,32 @@ class AppController extends Controller
         ]);
     }
 
+    public function actionDataGridAngular()
+    {
+        $sort = Yii::$app->request->getQueryParam('sort');
+
+        $sortOrder = [
+            'id' => ['app_id' => SORT_ASC],
+            '-id' => ['app_id' => SORT_DESC],
+            'name' => ['name' => SORT_ASC],
+            '-name' => ['name' => SORT_DESC]
+        ];
+
+        $order_by = isset($sortOrder[$sort])
+            ? $sortOrder[$sort]
+            : [];
+
+        if (Yii::$app->request->isPost) {
+            //Yii::$app->response->format = 'json'; this one also escape response, angular is shocked)
+            return json_encode(App::find()->orderBy($order_by)->with('versionCollection')->asArray()->all());
+        }
+
+        return $this->render('data_grid_angular', [
+            'sort' => $sort,
+            'appCollection' => App::find()->orderBy($order_by)->with('versionCollection')->all()
+        ]);
+    }
+
     public function actionView($id)
     {
         $model = self::findModel($id);

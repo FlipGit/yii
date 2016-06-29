@@ -20,18 +20,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'created_date')->textInput() ?>
-
-    <?= $form->field($model, 'updated_date')->textInput() ?>
-
-    <?= $form->field($model, 'attribute_json')->textarea(['rows' => 6]) ?>
-
-    <?= $form->field($model, 'performance_rank')->textInput() ?>
-
-    <?= $form->field($model, 'performance_per_vat')->textInput() ?>
-
-    <?= $form->field($model, 'performance_per_dollar')->textInput() ?>
-
     <?php
 
         $cpuAttributeValuesCollection = $model->getAttributeValuesForForm();

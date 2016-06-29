@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'updated_date',
             'attribute_json:ntext',
             'performance_rank',
-            'performance_per_vat',
+            'performance_per_watt',
             'performance_per_dollar',
         ],
     ]) ?>

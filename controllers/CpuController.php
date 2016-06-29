@@ -69,11 +69,11 @@ class CpuController extends Controller
 
         if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            return $model->validaAjax();
+            return $model->validateAjax();
         }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['update', 'id' => $model->cpu_id]);
+            return $this->redirect(['view', 'id' => $model->cpu_id]);
         } else {
             return $this->render('create', [
                 'model' => $model,
@@ -94,7 +94,7 @@ class CpuController extends Controller
 
         if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            return $model->validaAjax();
+            return $model->validateAjax();
         }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
