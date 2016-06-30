@@ -59,10 +59,10 @@ AppAsset::register($this);
             [
                 'label' => 'Cpu',
                 'items' => [
-                    ['label' => 'Cpu', 'url' => ['cpu/index']],
-                    ['label' => 'Cpu Attribute Group', 'url' => ['cpu-attribute-group/index']],
-                    ['label' => 'Cpu Attribute', 'url' => ['cpu-attribute/index']],
-                    ['label' => 'Cpu Attribute Value', 'url' => ['cpu-attribute-value/index']]
+                    ['label' => 'Cpu', 'url' => ['/backend/cpu/index']],
+                    ['label' => 'Cpu Attribute Group', 'url' => ['/backend/cpu-attribute-group/index']],
+                    ['label' => 'Cpu Attribute', 'url' => ['/backend/cpu-attribute/index']],
+                    ['label' => 'Cpu Attribute Value', 'url' => ['/backend/cpu-attribute-value/index']]
                 ]
             ],
             Yii::$app->user->isGuest ? (

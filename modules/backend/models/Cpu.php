@@ -1,6 +1,6 @@
 <?php
 
-namespace app\models;
+namespace app\modules\backend\models;
 
 use yii;
 use yii\helpers\Html;
@@ -24,8 +24,8 @@ use DateTimeZone;
  */
 class Cpu extends \yii\db\ActiveRecord
 {
-    /* @var $attributes \app\models\CpuAttribute[] */
-    /* @var $attributeValuesForForm \app\models\CpuAttributeValue[] */
+    /* @var $attributes \app\modules\backend\models\CpuAttribute[] */
+    /* @var $attributeValuesForForm \app\modules\backend\models\CpuAttributeValue[] */
     protected $attributeValuesForForm = -1; // -1 for GET update, see [[getAttributeValuesForForm]]
 
     /**
@@ -69,7 +69,7 @@ class Cpu extends \yii\db\ActiveRecord
     }
 
     // this one for create/update use only
-    /* @return \app\models\CpuAttributeValue[] */
+    /* @return \app\modules\backend\models\CpuAttributeValue[] */
     public function getAttributeValuesForForm()
     {
         // -1 mean GET update (need to load all attributes and their values from db)
@@ -189,6 +189,11 @@ class Cpu extends \yii\db\ActiveRecord
                 return $result;
             }
 
+            if (!is_array($this->attributeValuesForForm)) {
+                $transaction->commit();
+                return $result;
+            }
+
             foreach ($this->attributeValuesForForm as $attributeValue) {
                 if (!empty($attributeValue->value)) {
                     // [[cpu_id]] property not set at [[actionCreate]]
@@ -232,14 +237,14 @@ class Cpu extends \yii\db\ActiveRecord
         return $result;
     }
 
-    /* @return \app\models\CpuAttribute[] */
+    /* @return \app\modules\backend\models\CpuAttribute[] */
     public function getCpuAttributesWithExistingValues()
     {
         $cpu_id = $this->cpu_id;
 
         // populate all attributes from db and join existing value to attribute
         // (instead of tons queries for each attribute)
-        /* @var $cpuAttributeCollection \app\models\CpuAttribute[] */
+        /* @var $cpuAttributeCollection \app\modules\backend\models\CpuAttribute[] */
         return CpuAttribute::find()->joinWith([
             'cpuAttributeValues' => function (yii\db\ActiveQuery $query) use ($cpu_id) {
                 return $query->andOnCondition('cpu_id=:cpu_id', [':cpu_id' => $cpu_id]);

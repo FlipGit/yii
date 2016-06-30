@@ -45,6 +45,11 @@ $config = [
             ],
         ]
     ],
+    'modules' => [
+        'backend' => [
+            'class' => 'app\modules\backend\Module'
+        ],
+    ],
     'params' => $params,
 ];
 

@@ -1,16 +1,16 @@
 <?php
 
-namespace app\models;
+namespace app\modules\backend\models;
 
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\CpuAttributeValue;
+use app\modules\backend\models\Cpu;
 
 /**
- * CpuAttributeValueSearch represents the model behind the search form about `app\models\CpuAttributeValue`.
+ * CpuSearch represents the model behind the search form about `app\models\Cpu`.
  */
-class CpuAttributeValueSearch extends CpuAttributeValue
+class CpuSearch extends Cpu
 {
     /**
      * @inheritdoc
@@ -18,8 +18,9 @@ class CpuAttributeValueSearch extends CpuAttributeValue
     public function rules()
     {
         return [
-            [['cpu_attribute_value_id', 'cpu_id', 'cpu_attribute_id'], 'integer'],
-            [['value'], 'safe'],
+            [['cpu_id', 'performance_rank'], 'integer'],
+            [['name', 'created_date', 'updated_date', 'attribute_json'], 'safe'],
+            [['performance_per_watt', 'performance_per_dollar'], 'number'],
         ];
     }
 
@@ -41,7 +42,7 @@ class CpuAttributeValueSearch extends CpuAttributeValue
      */
     public function search($params)
     {
-        $query = CpuAttributeValue::find();
+        $query = Cpu::find();
 
         // add conditions that should always apply here
 
@@ -59,12 +60,16 @@ class CpuAttributeValueSearch extends CpuAttributeValue
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'cpu_attribute_value_id' => $this->cpu_attribute_value_id,
             'cpu_id' => $this->cpu_id,
-            'cpu_attribute_id' => $this->cpu_attribute_id,
+            'created_date' => $this->created_date,
+            'updated_date' => $this->updated_date,
+            'performance_rank' => $this->performance_rank,
+            'performance_per_watt' => $this->performance_per_watt,
+            'performance_per_dollar' => $this->performance_per_dollar,
         ]);
 
-        $query->andFilterWhere(['like', 'value', $this->value]);
+        $query->andFilterWhere(['like', 'name', $this->name])
+            ->andFilterWhere(['like', 'attribute_json', $this->attribute_json]);
 
         return $dataProvider;
     }

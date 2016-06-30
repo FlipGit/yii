@@ -1,18 +1,18 @@
 <?php
 
-namespace app\controllers;
+namespace app\modules\backend\controllers;
 
 use Yii;
-use app\models\CpuAttributeGroup;
-use app\models\CpuAttributeGroupSearch;
+use app\modules\backend\models\CpuAttribute;
+use app\modules\backend\models\CpuAttributeSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * CpuAttributeGroupController implements the CRUD actions for CpuAttributeGroup model.
+ * CpuAttributeController implements the CRUD actions for CpuAttribute model.
  */
-class CpuAttributeGroupController extends Controller
+class CpuAttributeController extends Controller
 {
     /**
      * @inheritdoc
@@ -30,12 +30,12 @@ class CpuAttributeGroupController extends Controller
     }
 
     /**
-     * Lists all CpuAttributeGroup models.
+     * Lists all CpuAttribute models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new CpuAttributeGroupSearch();
+        $searchModel = new CpuAttributeSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -45,7 +45,7 @@ class CpuAttributeGroupController extends Controller
     }
 
     /**
-     * Displays a single CpuAttributeGroup model.
+     * Displays a single CpuAttribute model.
      * @param integer $id
      * @return mixed
      */
@@ -57,16 +57,16 @@ class CpuAttributeGroupController extends Controller
     }
 
     /**
-     * Creates a new CpuAttributeGroup model.
+     * Creates a new CpuAttribute model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new CpuAttributeGroup();
+        $model = new CpuAttribute();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cpu_attribute_group_id]);
+            return $this->redirect(['view', 'id' => $model->cpu_attribute_id]);
         } else {
             return $this->render('create', [
                 'model' => $model,
@@ -75,7 +75,7 @@ class CpuAttributeGroupController extends Controller
     }
 
     /**
-     * Updates an existing CpuAttributeGroup model.
+     * Updates an existing CpuAttribute model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -85,7 +85,7 @@ class CpuAttributeGroupController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cpu_attribute_group_id]);
+            return $this->redirect(['view', 'id' => $model->cpu_attribute_id]);
         } else {
             return $this->render('update', [
                 'model' => $model,
@@ -94,7 +94,7 @@ class CpuAttributeGroupController extends Controller
     }
 
     /**
-     * Deletes an existing CpuAttributeGroup model.
+     * Deletes an existing CpuAttribute model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -107,15 +107,15 @@ class CpuAttributeGroupController extends Controller
     }
 
     /**
-     * Finds the CpuAttributeGroup model based on its primary key value.
+     * Finds the CpuAttribute model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return CpuAttributeGroup the loaded model
+     * @return CpuAttribute the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = CpuAttributeGroup::findOne($id)) !== null) {
+        if (($model = CpuAttribute::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

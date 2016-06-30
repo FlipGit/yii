@@ -1,10 +1,10 @@
 <?php
 
-namespace app\controllers;
+namespace app\modules\backend\controllers;
 
 use Yii;
-use app\models\CpuAttributeValue;
-use app\models\CpuAttributeValueSearch;
+use app\modules\backend\models\CpuAttributeValue;
+use app\modules\backend\models\CpuAttributeValueSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;

@@ -1,18 +1,20 @@
 <?php
 
-namespace app\controllers;
+namespace app\modules\backend\controllers;
 
-use Yii;
-use app\models\CpuAttribute;
-use app\models\CpuAttributeSearch;
+use app\modules\backend\models\CpuAttributeGroup;
+use yii;
+use app\modules\backend\models\Cpu;
+use app\modules\backend\models\CpuSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
- * CpuAttributeController implements the CRUD actions for CpuAttribute model.
+ * CpuController implements the CRUD actions for Cpu model.
  */
-class CpuAttributeController extends Controller
+class CpuController extends Controller
 {
     /**
      * @inheritdoc
@@ -30,12 +32,12 @@ class CpuAttributeController extends Controller
     }
 
     /**
-     * Lists all CpuAttribute models.
+     * Lists all Cpu models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new CpuAttributeSearch();
+        $searchModel = new CpuSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -45,7 +47,7 @@ class CpuAttributeController extends Controller
     }
 
     /**
-     * Displays a single CpuAttribute model.
+     * Displays a single Cpu model.
      * @param integer $id
      * @return mixed
      */
@@ -57,25 +59,31 @@ class CpuAttributeController extends Controller
     }
 
     /**
-     * Creates a new CpuAttribute model.
+     * Creates a new Cpu model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new CpuAttribute();
+        $model = new Cpu();
+
+        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return $model->validateAjax();
+        }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cpu_attribute_id]);
+            return $this->redirect(['view', 'id' => $model->cpu_id]);
         } else {
             return $this->render('create', [
                 'model' => $model,
+                'attributeGroupCollection' => CpuAttributeGroup::find()->with('cpuAttributes')->all()
             ]);
         }
     }
 
     /**
-     * Updates an existing CpuAttribute model.
+     * Updates an existing Cpu model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -84,17 +92,22 @@ class CpuAttributeController extends Controller
     {
         $model = $this->findModel($id);
 
+        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return $model->validateAjax();
+        }
+
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cpu_attribute_id]);
+            return $this->redirect(['view', 'id' => $model->cpu_id]);
         } else {
             return $this->render('update', [
-                'model' => $model,
+                'model' => $model
             ]);
         }
     }
 
     /**
-     * Deletes an existing CpuAttribute model.
+     * Deletes an existing Cpu model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -107,15 +120,15 @@ class CpuAttributeController extends Controller
     }
 
     /**
-     * Finds the CpuAttribute model based on its primary key value.
+     * Finds the Cpu model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return CpuAttribute the loaded model
+     * @return Cpu the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = CpuAttribute::findOne($id)) !== null) {
+        if (($model = Cpu::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

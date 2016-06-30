@@ -1,16 +1,16 @@
 <?php
 
-namespace app\models;
+namespace app\modules\backend\models;
 
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Cpu;
+use app\modules\backend\models\CpuAttributeValue;
 
 /**
- * CpuSearch represents the model behind the search form about `app\models\Cpu`.
+ * CpuAttributeValueSearch represents the model behind the search form about `app\models\CpuAttributeValue`.
  */
-class CpuSearch extends Cpu
+class CpuAttributeValueSearch extends CpuAttributeValue
 {
     /**
      * @inheritdoc
@@ -18,9 +18,8 @@ class CpuSearch extends Cpu
     public function rules()
     {
         return [
-            [['cpu_id', 'performance_rank'], 'integer'],
-            [['name', 'created_date', 'updated_date', 'attribute_json'], 'safe'],
-            [['performance_per_watt', 'performance_per_dollar'], 'number'],
+            [['cpu_attribute_value_id', 'cpu_id', 'cpu_attribute_id'], 'integer'],
+            [['value'], 'safe'],
         ];
     }
 
@@ -42,7 +41,7 @@ class CpuSearch extends Cpu
      */
     public function search($params)
     {
-        $query = Cpu::find();
+        $query = CpuAttributeValue::find();
 
         // add conditions that should always apply here
 
@@ -60,16 +59,12 @@ class CpuSearch extends Cpu
 
         // grid filtering conditions
         $query->andFilterWhere([
+            'cpu_attribute_value_id' => $this->cpu_attribute_value_id,
             'cpu_id' => $this->cpu_id,
-            'created_date' => $this->created_date,
-            'updated_date' => $this->updated_date,
-            'performance_rank' => $this->performance_rank,
-            'performance_per_watt' => $this->performance_per_watt,
-            'performance_per_dollar' => $this->performance_per_dollar,
+            'cpu_attribute_id' => $this->cpu_attribute_id,
         ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'attribute_json', $this->attribute_json]);
+        $query->andFilterWhere(['like', 'value', $this->value]);
 
         return $dataProvider;
     }
